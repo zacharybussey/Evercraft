@@ -14,6 +14,10 @@ type alias Character =
     }
 
 
+type alias DieRoll =
+    Int
+
+
 type Alignment
     = Good
     | Evil
@@ -24,6 +28,6 @@ defaultCharacter =
     { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5 }
 
 
-attack : Int -> Int -> Bool
+attack : DieRoll -> Int -> Bool
 attack diceRoll armorClass =
     diceRoll >= armorClass

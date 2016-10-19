@@ -8,7 +8,9 @@ import EverCraft exposing (..)
 all : Test
 all =
     describe "EverCraft"
-        [ testCoreBasics ]
+        [ testCoreBasics
+        , testAttacks
+        ]
 
 
 testCoreBasics =
@@ -44,12 +46,11 @@ testAttacks =
     describe "Attacking"
         [ test "check for hit"
             <| \() ->
-                let
-                    dieValue =
-                        20
-
-                    armorClass =
-                        10
-                in
-                    (attack dieValue armorClass) |> Expect.equal True
+                (attack 20 10) |> Expect.equal True
+        , test "check for miss"
+            <| \() ->
+                (attack 10 20) |> Expect.equal False
+        , test "check for equal"
+            <| \() ->
+                (attack 10 10) |> Expect.equal True
         ]
