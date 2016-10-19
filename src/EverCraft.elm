@@ -9,9 +9,13 @@ hello thing =
 type alias Character =
     { name : String
     , alignment : Alignment
-    , armorClass : Int
+    , armorClass : ArmorClass
     , hitPoints : Int
     }
+
+
+type alias ArmorClass =
+    Int
 
 
 type alias DieRoll =
@@ -28,6 +32,6 @@ defaultCharacter =
     { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5 }
 
 
-attack : DieRoll -> Int -> Bool
+attack : DieRoll -> ArmorClass -> Bool
 attack diceRoll armorClass =
     diceRoll >= armorClass
