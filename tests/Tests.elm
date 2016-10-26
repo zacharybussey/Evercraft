@@ -39,18 +39,45 @@ testCoreBasics =
                             { character | hitPoints = 3 }
                     in
                         (hurtCharacter.hitPoints |> Expect.equal 3)
+            , test "can set strength"
+                <| \() ->
+                    let
+                        strongCharacter =
+                            { character | strength = 13 }
+                    in
+                        (strongCharacter.strength |> Expect.equal 13)
+            , test "has default attributes"
+                <| \() ->
+                    let
+                        expectedDefaultCharacter =
+                            { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10 }
+                    in
+                        (defaultCharacter |> Expect.equal expectedDefaultCharacter)
             ]
 
 
 testAttacks =
-    describe "Attacking"
-        [ test "check for hit"
-            <| \() ->
-                (attack 20 10) |> Expect.equal True
-        , test "check for miss"
-            <| \() ->
-                (attack 10 20) |> Expect.equal False
-        , test "check for equal"
-            <| \() ->
-                (attack 10 10) |> Expect.equal True
-        ]
+    let
+        defender =
+            defaultCharacter
+
+        hurtDefender =
+            { defaultCharacter | hitPoints = 4 }
+
+        criticalDefender =
+            { defaultCharacter | hitPoints = 3 }
+    in
+        describe "Attacking"
+            [ test "check for hit"
+                <| \() ->
+                    (attack 11 defender) |> Expect.equal hurtDefender
+            , test "check for miss"
+                <| \() ->
+                    (attack 9 defender) |> Expect.equal defender
+            , test "check for equal"
+                <| \() ->
+                    (attack 10 defender) |> Expect.equal hurtDefender
+            , test "check for critical"
+                <| \() ->
+                    (attack 20 defender) |> Expect.equal criticalDefender
+            ]
