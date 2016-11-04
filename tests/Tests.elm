@@ -53,6 +53,16 @@ testCoreBasics =
                             { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10 }
                     in
                         (defaultCharacter |> Expect.equal expectedDefaultCharacter)
+            , test "modifiers are calculated correctly"
+                <| \() ->
+                    let
+                        inputs =
+                            [1..20]
+
+                        outputs =
+                            [ -5, -4, -4, -3, -3, -2, -2, -1, -1, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5 ]
+                    in
+                        ((List.map getModifier inputs) |> Expect.equal outputs)
             ]
 
 
@@ -66,6 +76,24 @@ testAttacks =
 
         criticalDefender =
             { defaultCharacter | hitPoints = 3 }
+
+        nimbleDefender =
+            { defaultCharacter | dexterity = 16 }
+
+        strongAttacker =
+            { defaultCharacter | strength = 16 }
+
+        heartyDefender =
+            { defaultCharacter | constitution = 16 }
+
+        clumsyDefender =
+            { defaultCharacter | dexterity = 1 }
+
+        weakAttacker =
+            { defaultCharacter | strength = 1 }
+
+        infirmDefender =
+            { defaultCharacter | constitution = 1 }
     in
         describe "Attacking"
             [ test "check for hit"
@@ -80,4 +108,7 @@ testAttacks =
             , test "check for critical"
                 <| \() ->
                     (attack 20 defender) |> Expect.equal criticalDefender
+            , test "check for hit with strong attacker"
+                <| \() ->
+                    ()
             ]
