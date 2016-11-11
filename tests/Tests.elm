@@ -50,7 +50,7 @@ testCoreBasics =
                 <| \() ->
                     let
                         expectedDefaultCharacter =
-                            { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10 }
+                            { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0 }
                     in
                         (defaultCharacter |> Expect.equal expectedDefaultCharacter)
             , test "modifiers are calculated correctly"
@@ -105,21 +105,33 @@ testAttacks =
 
         infirmDefender =
             { defaultCharacter | constitution = 1 }
+
+        experiencedAttacker =
+            { defaultCharacter | experience = 10 }
+
+        strongExperiencedAttacker =
+            { defaultCharacter | experience = 10, strength = 16 }
     in
         describe "Attacking"
             [ test "check for hit"
                 <| \() ->
-                    (attack 11 defaultCharacter defender |> Expect.equal hurtDefender)
+                    (assignDamage defaultCharacter defender Hit) |> Expect.equal hurtDefender
             , test "check for miss"
                 <| \() ->
-                    (attack 9 defaultCharacter defender) |> Expect.equal defender
-            , test "check for equal"
-                <| \() ->
-                    (attack 10 defaultCharacter defender) |> Expect.equal hurtDefender
+                    (assignDamage defaultCharacter defender Miss) |> Expect.equal defender
             , test "check for critical"
                 <| \() ->
-                    (attack 20 defaultCharacter defender) |> Expect.equal criticalDefender
+                    (assignDamage defaultCharacter defender Critical) |> Expect.equal criticalDefender
             , test "check for hit with strong attacker"
                 <| \() ->
-                    (attack 20 strongAttacker defender) |> Expect.equal deadDefender
+                    (assignDamage strongAttacker defender Critical) |> Expect.equal deadDefender
+            , test "experienceize hit"
+                <| \() ->
+                    (experienceize defaultCharacter Hit) |> Expect.equal experiencedAttacker
+            , test "experienceize miss"
+                <| \() ->
+                    (experienceize defaultCharacter Miss) |> Expect.equal defaultCharacter
+            , test "experienceize critical"
+                <| \() ->
+                    (experienceize defaultCharacter Critical) |> Expect.equal experiencedAttacker
             ]

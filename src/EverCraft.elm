@@ -18,6 +18,7 @@ type alias Character =
     , wisdom : Int
     , intelligence : Int
     , charisma : Int
+    , experience : Int
     }
 
 
@@ -42,7 +43,7 @@ type AttackSuccess
 
 
 defaultCharacter =
-    { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10 }
+    { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0 }
 
 
 applyModifiers : Character -> Character
@@ -78,16 +79,39 @@ evaluateAttackSuccess dieRoll strengthModifier defender =
         Miss
 
 
-assignDamage : Character -> Int -> Int
-assignDamage defender damageDealt =
+calcDamageDelt : Character -> Int -> Int
+calcDamageDelt defender damageDealt =
     defender.hitPoints - damageDealt + getModifier (defender.constitution)
 
 
-attack : DieRoll -> Character -> Character -> Character
-attack diceRoll attacker defender =
+experienceize : Character -> AttackSuccess -> Character
+experienceize attacker attackSuccess =
+    let
+        gainedXP =
+            if attackSuccess /= Miss then
+                10
+            else
+                0
+    in
+        { attacker | experience = attacker.experience + gainedXP }
+
+
+assignDamage : Character -> Character -> AttackSuccess -> Character
+assignDamage attacker defender attackSuccess =
     { defender
         | hitPoints =
-            evaluateAttackSuccess diceRoll (getModifier attacker.strength) defender
+            attackSuccess
                 |> damageDealtToDefender attacker
-                |> assignDamage defender
+                |> calcDamageDelt defender
     }
+
+
+attack : DieRoll -> Character -> Character -> ( Character, Character )
+attack diceRoll attacker defender =
+    let
+        attackSuccess =
+            evaluateAttackSuccess diceRoll (getModifier attacker.strength) defender
+    in
+        ( experienceize attacker attackSuccess
+        , assignDamage attacker defender attackSuccess
+        )
