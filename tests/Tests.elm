@@ -50,7 +50,7 @@ testCoreBasics =
                 <| \() ->
                     let
                         expectedDefaultCharacter =
-                            { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0 }
+                            { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0, level = 1, attackBonus = 0 }
                     in
                         (defaultCharacter |> Expect.equal expectedDefaultCharacter)
             , test "modifiers are calculated correctly"
@@ -111,6 +111,12 @@ testAttacks =
 
         strongExperiencedAttacker =
             { defaultCharacter | experience = 10, strength = 16 }
+
+        aboutToLevelToEvenLevelCharacter =
+            { defaultCharacter | experience = 990, constitution = 12 }
+
+        aboutToLevelToOddLevelCharacter =
+            { defaultCharacter | experience = 1990, constitution = 8 }
     in
         describe "Attacking"
             [ test "check for hit"
@@ -127,11 +133,17 @@ testAttacks =
                     (assignDamage strongAttacker defender Critical) |> Expect.equal deadDefender
             , test "experienceize hit"
                 <| \() ->
-                    (experienceize defaultCharacter Hit) |> Expect.equal experiencedAttacker
+                    (experienceize Hit defaultCharacter) |> Expect.equal experiencedAttacker
             , test "experienceize miss"
                 <| \() ->
-                    (experienceize defaultCharacter Miss) |> Expect.equal defaultCharacter
+                    (experienceize Miss defaultCharacter) |> Expect.equal defaultCharacter
             , test "experienceize critical"
                 <| \() ->
-                    (experienceize defaultCharacter Critical) |> Expect.equal experiencedAttacker
+                    (experienceize Critical defaultCharacter) |> Expect.equal experiencedAttacker
+            , test "experienceize to even level"
+                <| \() ->
+                    (experienceize Hit aboutToLevelToEvenLevelCharacter) |> Expect.equal { aboutToLevelToEvenLevelCharacter | experience = 1000, maxHitPoints = 11, hitPoints = 11, level = 2, attackBonus = 1 }
+            , test "experienceze to odd level"
+                <| \() ->
+                    (experienceize Hit aboutToLevelToOddLevelCharacter) |> Expect.equal { aboutToLevelToOddLevelCharacter | experience = 2000, maxHitPoints = 9, hitPoints = 9, level = 3 }
             ]
