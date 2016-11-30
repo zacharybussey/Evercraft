@@ -19,8 +19,17 @@ type alias Character =
     , intelligence : Int
     , charisma : Int
     , experience : Int
+    , level : Int
+    , attackBonus : Int
+    , class : Class
     }
 
+type Class
+    = NotSet
+    | Fighter
+    | Rogue
+    | Monk
+    | Paladin
 
 type alias ArmorClass =
     Int
@@ -43,7 +52,7 @@ type AttackSuccess
 
 
 defaultCharacter =
-    { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0 }
+    { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0, level = 1, attackBonus = 0, class = NotSet }
 
 
 applyModifiers : Character -> Character
@@ -84,8 +93,31 @@ calcDamageDelt defender damageDealt =
     defender.hitPoints - damageDealt + getModifier (defender.constitution)
 
 
-experienceize : Character -> AttackSuccess -> Character
-experienceize attacker attackSuccess =
+checkLevel : Character -> Character
+checkLevel ({ level, experience, hitPoints, maxHitPoints } as attacker) =
+    let
+        hitPointsToAdd = max (5 + (getModifier attacker.constitution)) 1
+        experienceLevel =
+            experience // 1000 + 1
+        newAtackBonus = getNewAttackBonus experienceLevel attacker.attackBonus
+    in
+        if level < experienceLevel then
+            { attacker | level = experienceLevel, hitPoints = hitPoints + hitPointsToAdd, maxHitPoints = maxHitPoints + hitPointsToAdd, attackBonus = newAtackBonus }
+        else
+            attacker
+
+getNewAttackBonus : Int -> Int -> Int
+getNewAttackBonus level oldAttackBonus =
+    let
+        addAttackBonus = rem level 2 == 0
+    in
+        if addAttackBonus then
+            oldAttackBonus + 1
+        else
+            oldAttackBonus
+
+experienceize : AttackSuccess -> Character -> Character
+experienceize attackSuccess attacker =
     let
         gainedXP =
             if attackSuccess /= Miss then
@@ -93,7 +125,7 @@ experienceize attacker attackSuccess =
             else
                 0
     in
-        { attacker | experience = attacker.experience + gainedXP }
+        checkLevel { attacker | experience = attacker.experience + gainedXP }
 
 
 assignDamage : Character -> Character -> AttackSuccess -> Character
@@ -112,6 +144,6 @@ attack diceRoll attacker defender =
         attackSuccess =
             evaluateAttackSuccess diceRoll (getModifier attacker.strength) defender
     in
-        ( experienceize attacker attackSuccess
+        ( attacker |> experienceize attackSuccess
         , assignDamage attacker defender attackSuccess
         )

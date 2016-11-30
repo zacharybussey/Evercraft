@@ -50,7 +50,7 @@ testCoreBasics =
                 <| \() ->
                     let
                         expectedDefaultCharacter =
-                            { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0, level = 1, attackBonus = 0 }
+                            { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0, level = 1, attackBonus = 0, class = NotSet }
                     in
                         (defaultCharacter |> Expect.equal expectedDefaultCharacter)
             , test "modifiers are calculated correctly"
