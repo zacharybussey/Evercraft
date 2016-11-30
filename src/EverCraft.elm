@@ -51,8 +51,10 @@ type AttackSuccess
     | Miss
 
 
+defaultClassFeatures =
+  { getNewAttackBonus = defaultGetNewAttackBonus }
 defaultCharacter =
-    { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0, level = 1, attackBonus = 0, class = NotSet }
+    { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0, level = 1, attackBonus = 0, class = NotSet, classFeatures = defaultClassFeatures }
 
 
 applyModifiers : Character -> Character
@@ -106,8 +108,8 @@ checkLevel ({ level, experience, hitPoints, maxHitPoints, class } as attacker) =
         else
             attacker
 
-getNewAttackBonus : Int -> Int -> Int
-getNewAttackBonus level oldAttackBonus =
+defaultGetNewAttackBonus : Int -> Int -> Int
+defaultGetNewAttackBonus level oldAttackBonus =
     let
         addAttackBonus = rem level 2 == 0
     in
