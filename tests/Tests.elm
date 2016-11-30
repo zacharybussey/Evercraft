@@ -147,3 +147,5 @@ testAttacks =
                 <| \() ->
                     (experienceize Hit aboutToLevelToOddLevelCharacter) |> Expect.equal { aboutToLevelToOddLevelCharacter | experience = 2000, maxHitPoints = 9, hitPoints = 9, level = 3 }
             ]
+
+testFighterClass

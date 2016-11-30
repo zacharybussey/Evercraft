@@ -1,11 +1,6 @@
 module EverCraft exposing (..)
 
 
-hello : String -> String
-hello thing =
-    "hello " ++ thing
-
-
 type alias Character =
     { name : String
     , alignment : Alignment
@@ -22,6 +17,7 @@ type alias Character =
     , level : Int
     , attackBonus : Int
     , class : Class
+    , classFeatures : ClassFeatures
     }
 
 type Class
@@ -30,6 +26,10 @@ type Class
     | Rogue
     | Monk
     | Paladin
+
+type alias ClassFeatures =
+    { getNewAttackBonus : Int -> Int -> Int
+    }
 
 type alias ArmorClass =
     Int
@@ -94,15 +94,15 @@ calcDamageDelt defender damageDealt =
 
 
 checkLevel : Character -> Character
-checkLevel ({ level, experience, hitPoints, maxHitPoints } as attacker) =
+checkLevel ({ level, experience, hitPoints, maxHitPoints, class } as attacker) =
     let
         hitPointsToAdd = max (5 + (getModifier attacker.constitution)) 1
         experienceLevel =
             experience // 1000 + 1
-        newAtackBonus = getNewAttackBonus experienceLevel attacker.attackBonus
+        newAttackBonus = attacker.classFeatures.getNewAttackBonus experienceLevel attacker.attackBonus
     in
         if level < experienceLevel then
-            { attacker | level = experienceLevel, hitPoints = hitPoints + hitPointsToAdd, maxHitPoints = maxHitPoints + hitPointsToAdd, attackBonus = newAtackBonus }
+            { attacker | level = experienceLevel, hitPoints = hitPoints + hitPointsToAdd, maxHitPoints = maxHitPoints + hitPointsToAdd, attackBonus = newAttackBonus }
         else
             attacker
 
@@ -115,6 +115,11 @@ getNewAttackBonus level oldAttackBonus =
             oldAttackBonus + 1
         else
             oldAttackBonus
+
+getNewAttackBonusFighter : Int -> Int -> Int
+getNewAttackBonusFighter level oldAttackBonus =
+    oldAttackBonus + 1
+
 
 experienceize : AttackSuccess -> Character -> Character
 experienceize attackSuccess attacker =
