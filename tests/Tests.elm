@@ -10,6 +10,7 @@ all =
     describe "EverCraft"
         [ testCoreBasics
         , testAttacks
+        , testFighter
         ]
 
 
@@ -139,4 +140,16 @@ testAttacks =
             , test "experienceze to odd level"
                 <| \() ->
                     (experienceize Hit aboutToLevelToOddLevelCharacter) |> Expect.equal { aboutToLevelToOddLevelCharacter | experience = 2000, maxHitPoints = 9, hitPoints = 9, level = 3 }
+            ]
+
+testFighter =
+    let
+        fighter = makeNewCharacter Fighter
+        aboutToLevelFighter = {fighter | experience = 1000 }
+        leveledFighter = { aboutToLevelFighter | attackBonus = 1, hitPoints = 15, maxHitPoints = 15, level = 2 }
+    in
+        describe "Fighter class attributes"
+            [ test "attack/hp bonus"
+                <| \() ->
+                    (checkLevel aboutToLevelFighter) |> Expect.equal leveledFighter
             ]
