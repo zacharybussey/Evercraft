@@ -20,6 +20,7 @@ type alias Character =
     , classFeatures : ClassFeatures
     }
 
+
 type Class
     = NotSet
     | Fighter
@@ -27,10 +28,12 @@ type Class
     | Monk
     | Paladin
 
+
 type alias ClassFeatures =
     { getNewAttackBonus : Int -> Int -> Int
     , getHitpointBonus : Int -> Int
     }
+
 
 type alias ArmorClass =
     Int
@@ -53,21 +56,30 @@ type AttackSuccess
 
 
 defaultClassFeatures =
-  { getNewAttackBonus = defaultGetNewAttackBonus,
-    getHitpointBonus = defaultGetHitpointBonus }
+    { getNewAttackBonus = defaultGetNewAttackBonus
+    , getHitpointBonus = defaultGetHitpointBonus
+    }
+
+
 fighterClassFeatures =
     { getNewAttackBonus = getNewAttackBonusFighter
     , getHitpointBonus = getHitpointBonusFighter
     }
+
+
 defaultCharacter =
     { name = "", alignment = Neutral, armorClass = 10, hitPoints = 5, maxHitPoints = 5, strength = 10, dexterity = 10, constitution = 10, wisdom = 10, intelligence = 10, charisma = 10, experience = 0, level = 1, attackBonus = 0, class = NotSet, classFeatures = defaultClassFeatures }
+
 
 makeNewCharacter : Class -> Character
 makeNewCharacter class =
     case class of
         Fighter ->
             { defaultCharacter | classFeatures = fighterClassFeatures }
-        _ -> defaultCharacter
+
+        _ ->
+            defaultCharacter
+
 
 applyModifiers : Character -> Character
 applyModifiers ({ constitution } as character) =
@@ -110,37 +122,47 @@ calcDamageDelt defender damageDealt =
 checkLevel : Character -> Character
 checkLevel ({ level, experience, hitPoints, maxHitPoints, class } as attacker) =
     let
-        hitPointsToAdd = attacker.classFeatures.getHitpointBonus attacker.constitution
+        hitPointsToAdd =
+            attacker.classFeatures.getHitpointBonus attacker.constitution
+
         experienceLevel =
             experience // 1000 + 1
-        newAttackBonus = attacker.classFeatures.getNewAttackBonus experienceLevel attacker.attackBonus
+
+        newAttackBonus =
+            attacker.classFeatures.getNewAttackBonus experienceLevel attacker.attackBonus
     in
         if level < experienceLevel then
             { attacker | level = experienceLevel, hitPoints = hitPoints + hitPointsToAdd, maxHitPoints = maxHitPoints + hitPointsToAdd, attackBonus = newAttackBonus }
         else
             attacker
 
+
 defaultGetNewAttackBonus : Int -> Int -> Int
 defaultGetNewAttackBonus level oldAttackBonus =
     let
-        addAttackBonus = rem level 2 == 0
+        addAttackBonus =
+            rem level 2 == 0
     in
         if addAttackBonus then
             oldAttackBonus + 1
         else
             oldAttackBonus
 
+
 getNewAttackBonusFighter : Int -> Int -> Int
 getNewAttackBonusFighter level oldAttackBonus =
     oldAttackBonus + 1
+
 
 defaultGetHitpointBonus : Int -> Int
 defaultGetHitpointBonus constitution =
     max (5 + (getModifier constitution)) 1
 
+
 getHitpointBonusFighter : Int -> Int
 getHitpointBonusFighter constitution =
     max (10 + (getModifier constitution)) 1
+
 
 experienceize : AttackSuccess -> Character -> Character
 experienceize attackSuccess attacker =
