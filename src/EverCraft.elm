@@ -32,7 +32,13 @@ type Class
 type alias ClassFeatures =
     { getNewAttackBonus : Int -> Int -> Int
     , getHitpointBonus : Int -> Int
+    , getCriticalHitDamage : Int -> Int
+    , getAttackAttribute : Blah
     }
+
+
+type Blah
+    = Blah (Character -> Int)
 
 
 type alias ArmorClass =
@@ -58,12 +64,22 @@ type AttackSuccess
 defaultClassFeatures =
     { getNewAttackBonus = defaultGetNewAttackBonus
     , getHitpointBonus = defaultGetHitpointBonus
+    , getCriticalHitDamage = getCriticalHitDamageDefault
+    , getAttackAttribute = Blah (\character -> character.strength)
     }
 
 
 fighterClassFeatures =
-    { getNewAttackBonus = getNewAttackBonusFighter
-    , getHitpointBonus = getHitpointBonusFighter
+    { defaultClassFeatures
+        | getNewAttackBonus = getNewAttackBonusFighter
+        , getHitpointBonus = getHitpointBonusFighter
+    }
+
+
+rogueClassFeatures =
+    { defaultClassFeatures
+        | getCriticalHitDamage = getCriticalHitDamageRogue
+        , getAttackAttribute = Blah (\character -> character.dexterity)
     }
 
 
@@ -76,6 +92,9 @@ makeNewCharacter class =
     case class of
         Fighter ->
             { defaultCharacter | classFeatures = fighterClassFeatures }
+
+        Rogue ->
+            { defaultCharacter | classFeatures = rogueClassFeatures }
 
         _ ->
             defaultCharacter
@@ -93,15 +112,21 @@ getModifier attributeValue =
 
 damageDealtToDefender : Character -> AttackSuccess -> Int
 damageDealtToDefender attacker attackSuccess =
-    case attackSuccess of
-        Critical ->
-            max 1 ((1 + getModifier (attacker.strength)) * 2)
+    let
+        attackAttribute =
+            case attacker.classFeatures.getAttackAttribute of
+                Blah fn ->
+                    fn attacker
+    in
+        case attackSuccess of
+            Critical ->
+                attacker.classFeatures.getCriticalHitDamage attackAttribute
 
-        Hit ->
-            max 1 (1 + getModifier (attacker.strength))
+            Hit ->
+                max 1 (1 + getModifier (attackAttribute))
 
-        Miss ->
-            0
+            Miss ->
+                0
 
 
 evaluateAttackSuccess : DieRoll -> Int -> Character -> AttackSuccess
@@ -162,6 +187,16 @@ defaultGetHitpointBonus constitution =
 getHitpointBonusFighter : Int -> Int
 getHitpointBonusFighter constitution =
     max (10 + (getModifier constitution)) 1
+
+
+getCriticalHitDamageDefault : Int -> Int
+getCriticalHitDamageDefault strength =
+    max 1 ((1 + getModifier (strength)) * 2)
+
+
+getCriticalHitDamageRogue : Int -> Int
+getCriticalHitDamageRogue strength =
+    max 3 ((1 + getModifier (strength)) * 3)
 
 
 experienceize : AttackSuccess -> Character -> Character

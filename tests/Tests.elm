@@ -11,6 +11,7 @@ all =
         [ testCoreBasics
         , testAttacks
         , testFighter
+        , testRogue
         ]
 
 
@@ -158,4 +159,19 @@ testFighter =
             [ test "attack/hp bonus" <|
                 \() ->
                     (checkLevel aboutToLevelFighter) |> Expect.equal leveledFighter
+            ]
+
+
+testRogue =
+    let
+        rogue =
+            makeNewCharacter Rogue
+    in
+        describe "Rogue class attributes"
+            [ test "critical attack bonus" <|
+                \() ->
+                    (damageDealtToDefender rogue Critical) |> Expect.equal 3
+            , test "TODO: write this test" <|
+                \() ->
+                    (True |> Expect.equal True)
             ]
